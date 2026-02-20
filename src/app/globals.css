@@ -1,26 +1,426 @@
 @import "tailwindcss";
 
+/* === Base Styles === */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --wood-primary: #eebf7a;
+  --wood-secondary: #e6b265;
+  --wood-bar: #f6c886;
+  --wood-dark: #c79550;
+  --wood-border: #8b5a2b;
+  --wood-counter: #d49b54;
+  --belt-color: #f3c273;
+  --green-tea: #96a56c;
+  --soy-sauce: #3a0b0b;
+  --game-bg: #b2c077;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-noto-sans-kr), 'Noto Sans KR', sans-serif;
+  background: #1a1a1a;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 나무 배경 (세로줄 목재) */
+.wood-bg {
+  background-color: var(--wood-primary);
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent 30px,
+    rgba(0, 0, 0, 0.04) 30px,
+    rgba(0, 0, 0, 0.04) 32px
+  ),
+  linear-gradient(to right, var(--wood-primary), var(--wood-secondary));
+}
+
+/* 상단/하단 바 스타일 */
+.wood-bar {
+  background-color: var(--wood-bar);
+  border-top: 2px solid #ffdfaa;
+  border-bottom: 2px solid var(--wood-dark);
+}
+
+/* 컨베이어 벨트 */
+.belt-bg {
+  background-color: var(--belt-color);
+}
+
+.belt-curves {
+  background-image: radial-gradient(
+    circle at 0% 50%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.1) 61%,
+    rgba(0, 0, 0, 0.1) 63%,
+    transparent 64%
+  );
+  background-size: 80px 100%;
+  animation: beltMove 1.5s linear infinite;
+}
+
+@keyframes beltMove {
+  from { background-position: 0 0; }
+  to { background-position: -80px 0; }
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(calc(100vw)); }
+  to { transform: translateX(-300px); }
+}
+
+@keyframes slideLeftDesktop {
+  from { transform: translateX(640px); }
+  to { transform: translateX(-300px); }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stampIn {
+  0% {
+    transform: rotate(-15deg) scale(3);
+    opacity: 0;
+  }
+  60% {
+    transform: rotate(-15deg) scale(0.9);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-15deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes comboFlash {
+  0% { background-color: rgba(255, 215, 0, 0); }
+  50% { background-color: rgba(255, 215, 0, 0.3); }
+  100% { background-color: rgba(255, 215, 0, 0); }
+}
+
+/* === Component Styles === */
+
+/* 코스 선택 버튼 */
+.course-btn {
+  background-color: #fdf5e6;
+  border: 4px solid var(--wood-border);
+  border-radius: 12px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.course-btn:hover {
+  background-color: #fffcf8;
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.course-btn:active {
+  transform: translateY(0);
+}
+
+/* 난이도 탭 */
+.difficulty-tab {
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  border: 3px solid transparent;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.difficulty-tab.active {
+  border-color: #cc0000;
+  color: #000;
+  font-weight: 900;
+}
+
+.difficulty-tab:not(.active):hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 일반 버튼 */
+.sushi-btn {
+  background-color: #fff;
+  border: 3px solid var(--wood-border);
+  border-radius: 6px;
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-weight: 700;
+  color: #333;
+}
+
+.sushi-btn:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-1px);
+}
+
+.sushi-btn:active {
+  transform: translateY(0);
+  background-color: #eee;
+}
+
+/* 단어 카드 */
+.word-card {
+  background: #1a1a1a;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 140px;
+}
+
+/* 결과 종이 접힘 효과 */
+.paper-fold {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(to top left, transparent 50%, #ddd 50%);
+  box-shadow: -2px -2px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 성적 도장 */
+.stamp {
+  animation: stampIn 0.5s ease-out forwards;
+}
+
+/* 접시 색깔 원 */
+.plate-ring {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border-width: 2px;
+  border-style: solid;
+}
+
+/* 스코어 바 */
+.score-bar {
+  background-color: var(--wood-bar);
+  border-top: 2px solid #ffdfaa;
+  border-bottom: 2px solid var(--wood-dark);
+}
+
+/* === 반응형 디자인 === */
+
+/* 게임 컨테이너 */
+.game-container {
+  width: 640px;
+  height: 520px;
+  max-width: 100vw;
+  max-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 680px) {
+  .game-container {
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+
+  .slideLeftAnim {
+    animation-name: slideLeft !important;
+  }
+
+  .course-list {
+    padding: 0 12px;
+  }
+
+  .course-btn {
+    padding: 8px !important;
+  }
+
+  .difficulty-tabs {
+    padding: 6px 8px !important;
+    gap: 2px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .difficulty-tab {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  .top-bar-text {
+    font-size: 14px !important;
+  }
+
+  .top-bar-time {
+    font-size: 24px !important;
+  }
+
+  .combo-meter {
+    width: 150px !important;
+  }
+
+  .combo-label {
+    font-size: 8px !important;
+  }
+
+  .score-bar-item {
+    font-size: 10px !important;
+  }
+
+  .score-bar-price {
+    display: none;
+  }
+
+  .word-card {
+    min-width: 120px;
+    padding: 8px 16px !important;
+  }
+
+  .word-text {
+    font-size: 16px !important;
+  }
+
+  .result-card {
+    width: calc(100vw - 24px) !important;
+    margin: 0 12px;
+  }
+
+  .result-header {
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+  }
+
+  .result-body {
+    padding: 16px !important;
+  }
+
+  .result-score-text {
+    font-size: 18px !important;
+  }
+
+  .result-score-num {
+    font-size: 22px !important;
+  }
+
+  .result-diff-text {
+    font-size: 16px !important;
+  }
+
+  .result-diff-num {
+    font-size: 20px !important;
+  }
+
+  .result-stat-label {
+    font-size: 9px !important;
+  }
+
+  .result-stat-value {
+    font-size: 18px !important;
+  }
+
+  .nav-buttons {
+    width: calc(100vw - 24px) !important;
+    margin: 0 12px;
+  }
+
+  .sushi-emoji {
+    font-size: 40px !important;
+  }
+
+  .plate-container {
+    width: 120px !important;
+    height: 45px !important;
+  }
+
+  .plate-outer {
+    width: 110px !important;
+    height: 40px !important;
+  }
+
+  .plate-inner {
+    width: 80px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .difficulty-tab {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+
+  .course-emoji {
+    font-size: 32px !important;
+    width: 50px !important;
+  }
+
+  .course-title {
+    font-size: 14px !important;
+  }
+
+  .course-cost {
+    font-size: 14px !important;
+  }
+
+  .course-desc {
+    font-size: 11px !important;
+  }
+
+  .combo-meter {
+    width: 100px !important;
+  }
+
+  .top-bar {
+    padding: 0 8px !important;
+  }
+}
+
+/* 모바일 가상 키보드 대응 */
+@media (max-height: 500px) {
+  .game-container {
+    height: 100dvh;
+  }
+
+  .game-area {
+    min-height: 200px;
+  }
+}
+
+/* 타이틀 화면 텍스트 그림자 */
+.title-text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 히든 인풋 */
+.hidden-input {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
 }
