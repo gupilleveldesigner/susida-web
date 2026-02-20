@@ -27,9 +27,11 @@ export default function SusidaGame() {
   const [combo, setCombo] = useState(0);
   const [showComboBonus, setShowComboBonus] = useState(false);
   const [comboSeconds, setComboSeconds] = useState(0);
+  const [inputKey, setInputKey] = useState(0); // Force remount input to reset Korean IME
 
   const inputRef = useRef<HTMLInputElement>(null);
   const itemIdCounter = useRef(0);
+  const isComposing = useRef(false); // Track Korean IME composition state
 
   // Timer
   useEffect(() => {
@@ -119,8 +121,26 @@ export default function SusidaGame() {
     }
   }, [gameState, currentCourse, currentItem, spawnNextItem]);
 
+  const handleCompositionStart = () => {
+    isComposing.current = true;
+  };
+
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
+    isComposing.current = false;
+    // Trigger input handling after composition ends
+    handleInputValue((e.target as HTMLInputElement).value);
+  };
+
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    // Skip during Korean IME composition - wait for compositionend
+    if (isComposing.current) {
+      setInputText(e.target.value);
+      return;
+    }
+    handleInputValue(e.target.value);
+  };
+
+  const handleInputValue = (value: string) => {
     if (!currentItem) {
       setInputText(value);
       return;
@@ -128,8 +148,9 @@ export default function SusidaGame() {
 
     // Word completed
     if (value === currentItem.word) {
+      const remainingKeys = currentItem.word.length - inputText.length;
       setScore(prev => prev + currentItem.price);
-      setCorrectKeys(prev => prev + currentItem.word.length);
+      setCorrectKeys(prev => prev + Math.max(remainingKeys, 0));
       setPlateCounts(prev => ({ ...prev, [currentItem.price]: prev[currentItem.price] + 1 }));
 
       setCombo(prev => {
@@ -145,6 +166,9 @@ export default function SusidaGame() {
         }
         return newCombo;
       });
+
+      // Force remount input to fully reset Korean IME state
+      setInputKey(prev => prev + 1);
       spawnNextItem();
       return;
     }
@@ -164,8 +188,9 @@ export default function SusidaGame() {
   };
 
   const diff = currentCourse ? score - currentCourse.cost : 0;
-  const elapsedTime = currentCourse ? currentCourse.timeLimit - timeLeft : 0;
-  const avgKeysPerSec = elapsedTime > 0 ? (correctKeys / elapsedTime).toFixed(1) : '0.0';
+  // Use totalGameTime for avg calculation (includes bonus seconds, minus remaining time)
+  const actualPlayTime = totalGameTime - timeLeft;
+  const avgKeysPerSec = actualPlayTime > 0 ? (correctKeys / actualPlayTime).toFixed(1) : '0.0';
   const comboProgress = (combo % 20) / 20 * 100;
 
   // ============================
@@ -272,12 +297,15 @@ export default function SusidaGame() {
         onClick={() => inputRef.current?.focus()}
       >
         <div className="game-container flex flex-col relative" style={{ backgroundColor: '#b2c077' }}>
-          {/* Hidden input */}
+          {/* Hidden input - key changes on word completion to reset Korean IME */}
           <input
+            key={`input-${inputKey}`}
             ref={inputRef}
             type="text"
             value={inputText}
             onChange={handleInput}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
             className="hidden-input"
             autoFocus
             autoComplete="off"
